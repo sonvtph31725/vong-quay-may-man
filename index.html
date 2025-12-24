@@ -2,163 +2,677 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Vòng quay may mắn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vòng quay may mắn - Premium Edition</title>
 <style>
-  body {
+  :root {
+    --primary-color: #8a2be2;
+    --secondary-color: #ff6b6b;
+    --accent-color: #4ecdc4;
+    --dark-bg: #0f0f1e;
+    --darker-bg: #0a0a14;
+    --light-text: #f0f0f0;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  * {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #111;
-    color: #fff;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+    color: var(--light-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    max-width: 800px;
+    padding: 0 20px;
+  }
+
+  h1 {
+    font-size: 3.2rem;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, #ff6b6b, #4ecdc4, #8a2be2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    margin-bottom: 25px;
+    font-weight: 300;
+  }
+
+  .main-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .wheel-section {
+    flex: 1;
+    min-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  h2 {
-    margin: 20px 0 10px;
-  }
-
   #container {
     position: relative;
-    width: 360px;
-    height: 360px;
+    width: 400px;
+    height: 400px;
+    margin-bottom: 20px;
   }
 
   canvas {
-    background: #222;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1e 100%);
     border-radius: 50%;
+    box-shadow: var(--shadow), inset 0 0 50px rgba(0, 0, 0, 0.7);
+    border: 8px solid #2a2a3e;
+    transition: var(--transition);
   }
 
-#pointer {
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-top: 26px solid #e74c3c; /* đầu nhọn quay xuống */
-  z-index: 10;
-}
+  canvas:hover {
+    transform: scale(1.01);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+  }
 
-  button {
+  #pointer {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 22px solid transparent;
+    border-right: 22px solid transparent;
+    border-top: 40px solid #ff6b6b;
+    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.5));
+    z-index: 10;
+    transition: var(--transition);
+  }
+
+  #pointer:after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -8px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
     margin-top: 20px;
-    padding: 10px 24px;
-    font-size: 18px;
+  }
+
+  #spinBtn {
+    margin-top: 10px;
+    padding: 18px 45px;
+    font-size: 1.3rem;
+    font-weight: 700;
     cursor: pointer;
     border: none;
-    border-radius: 6px;
-    background: #3498db;
+    border-radius: 50px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     color: #fff;
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+    transition: var(--transition);
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  #spinBtn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+    transition: all 0.6s;
+    z-index: -1;
+  }
+
+  #spinBtn:hover:before {
+    left: 0;
+  }
+
+  #spinBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px rgba(138, 43, 226, 0.5);
+  }
+
+  #spinBtn:active {
+    transform: translateY(-2px);
+  }
+
+  #spinBtn:disabled {
+    background: #555;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  #spinBtn:disabled:before {
+    display: none;
+  }
+
+  .result-section {
+    flex: 1;
+    min-width: 350px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .result-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+    text-align: center;
   }
 
   #result {
-    margin-top: 15px;
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-align: center;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+  }
+
+  .result-active {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+    transform: scale(1.02);
+  }
+
+  .history {
+    margin-top: 25px;
+  }
+
+  .history h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: var(--secondary-color);
+  }
+
+  #historyList {
+    list-style-type: none;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  #historyList li {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    border-left: 4px solid var(--primary-color);
+    transition: var(--transition);
+  }
+
+  #historyList li:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+  }
+
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-color);
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 5px;
+  }
+
+  .options-info {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .options-info h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--secondary-color);
+  }
+
+  .options-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .color-sample {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 12px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .footer {
+    margin-top: 40px;
+    text-align: center;
+    opacity: 0.7;
+    font-size: 0.9rem;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 800px;
+  }
+
+  /* Animation cho kết quả */
+  @keyframes highlight {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .highlight {
+    animation: highlight 0.6s ease 3;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-container {
+      flex-direction: column;
+    }
+    
+    .wheel-section, .result-section {
+      min-width: 100%;
+    }
+    
+    #container {
+      width: 350px;
+      height: 350px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #container {
+      width: 300px;
+      height: 300px;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .result-section {
+      padding: 20px;
+    }
+  }
+
+  /* Scrollbar tùy chỉnh */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
   }
 </style>
 </head>
 <body>
 
-<h2>🎡 Vòng quay may mắn</h2>
-
-<div id="container">
-  <div id="pointer"></div>
-  <canvas id="wheel" width="360" height="360"></canvas>
+<div class="header">
+  <h1>🎡 VÒNG QUAY MAY MẮN 🎡</h1>
+  <p class="subtitle">Thử vận may của bạn với vòng quay đầy màu sắc!</p>
 </div>
 
-<button id="spinBtn">Quay</button>
-<div id="result"></div>
+<div class="main-container">
+  <div class="wheel-section">
+    <div id="container">
+      <div id="pointer"></div>
+      <canvas id="wheel" width="400" height="400"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button id="spinBtn">QUAY NGAY!</button>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="spinCount">0</div>
+          <div class="stat-label">Lần quay</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="remainingSpins">3</div>
+          <div class="stat-label">Còn lại</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="lastResult">-</div>
+          <div class="stat-label">Lần trước</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="result-section">
+    <h2>🎊 KẾT QUẢ 🎊</h2>
+    <div id="result">Chờ kết quả...</div>
+    
+    <div class="history">
+      <h3>📜 LỊCH SỬ QUAY</h3>
+      <ul id="historyList">
+        <!-- Lịch sử sẽ được thêm vào đây -->
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="options-info">
+  <h3>CÁC TÌNH HUỐNG TRONG VÒNG QUAY</h3>
+  <div class="options-container">
+    <div class="option-item">
+      <div class="color-sample" style="background-color: #f1c40f;"></div>
+      <span>Tình huống 1</span>
+    </div>
+    <div class="option-item">
+      <div class="color-sample" style="background-color: #e74c3c;"></div>
+      <span>Tình huống 2</span>
+    </div>
+    <div class="option-item">
+      <div class="color-sample" style="background-color: #3498db;"></div>
+      <span>Tình huống 3</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Vòng quay may mắn © 2023 | Thiết kế bởi Frontend Dev 20 năm kinh nghiệm</p>
+  <p>Mỗi lần quay sẽ hiển thị kết quả theo thứ tự được định sẵn</p>
+</div>
 
 <script>
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
+const spinBtn = document.getElementById("spinBtn");
+const resultElement = document.getElementById("result");
+const historyList = document.getElementById("historyList");
+const spinCountElement = document.getElementById("spinCount");
+const remainingSpinsElement = document.getElementById("remainingSpins");
+const lastResultElement = document.getElementById("lastResult");
 
+// Cấu hình vòng quay
 const options = ["Tình huống 1", "Tình huống 2", "Tình huống 3"];
 const colors = ["#f1c40f", "#e74c3c", "#3498db"];
 const arc = (2 * Math.PI) / options.length;
+const order = [2, 1, 0]; // Thứ tự kết quả: lần 1 -> 3, lần 2 -> 2, lần 3 -> 1
 
+// Biến trạng thái
 let startAngle = 0;
 let currentRotation = 0;
 let spinCount = 0;
+let isSpinning = false;
+let spinHistory = [];
 
-// Thứ tự kết quả: lần 1 -> 3, lần 2 -> 2, lần 3 -> 1
-const order = [2, 1, 0]; // index trong options (0: Nhóm1, 1: Nhóm2, 2: Nhóm3)
+// Khởi tạo vòng quay
+drawWheel();
 
+// Vẽ vòng quay
 function drawWheel() {
   const center = canvas.width / 2;
+  const radius = center - 10;
+  
+  // Xóa canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  
+  // Vẽ các phần
   for (let i = 0; i < options.length; i++) {
     const angle = startAngle + i * arc;
+    
+    // Vẽ phần màu
     ctx.beginPath();
     ctx.fillStyle = colors[i];
     ctx.moveTo(center, center);
-    ctx.arc(center, center, center - 5, angle, angle + arc);
+    ctx.arc(center, center, radius, angle, angle + arc);
     ctx.fill();
-
+    
+    // Đường viền cho phần
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
     // Vẽ chữ
     ctx.save();
     ctx.translate(center, center);
     ctx.rotate(angle + arc / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 20px Arial";
-    ctx.fillText(options[i], center - 20, 8);
+    ctx.font = "bold 22px 'Segoe UI', Arial, sans-serif";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+    ctx.shadowBlur = 5;
+    ctx.fillText(options[i], radius - 25, 8);
     ctx.restore();
   }
-
-  // tâm
+  
+  // Vẽ viền ngoài
   ctx.beginPath();
-  ctx.fillStyle = "#fff";
+  ctx.arc(center, center, radius, 0, 2 * Math.PI);
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "#2a2a3e";
+  ctx.stroke();
+  
+  // Vẽ tâm vòng quay
+  const gradient = ctx.createRadialGradient(center, center, 5, center, center, 35);
+  gradient.addColorStop(0, '#fff');
+  gradient.addColorStop(1, '#ccc');
+  
+  ctx.beginPath();
   ctx.arc(center, center, 35, 0, 2 * Math.PI);
+  ctx.fillStyle = gradient;
   ctx.fill();
-
-  ctx.fillStyle = "#333";
-  ctx.font = "bold 16px Arial";
+  
+  // Vẽ viền tâm
+  ctx.beginPath();
+  ctx.arc(center, center, 35, 0, 2 * Math.PI);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#2a2a3e";
+  ctx.stroke();
+  
+  // Vẽ biểu tượng ở tâm
+  ctx.fillStyle = "#2a2a3e";
+  ctx.font = "bold 18px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("SPIN", center, center + 6);
+  ctx.textBaseline = "middle";
+  ctx.fillText("🎯", center, center);
 }
 
-drawWheel();
-
+// Xử lý quay
 function spin() {
-  const index = order[spinCount % order.length];
+  if (isSpinning || spinCount >= order.length) return;
+  
+  isSpinning = true;
+  spinBtn.disabled = true;
+  spinBtn.textContent = "ĐANG QUAY...";
+  
+  // Xác định kết quả theo thứ tự
+  const index = order[spinCount];
   spinCount++;
-
-  const targetAngle =
-    3 * Math.PI / 2 - (index * arc + arc / 2); 
-  // kim ở trên (270deg)
-
-  const spins = 6 * Math.PI * 2;
+  
+  // Cập nhật thống kê
+  spinCountElement.textContent = spinCount;
+  remainingSpinsElement.textContent = Math.max(0, order.length - spinCount);
+  
+  // Góc đích để phần được chọn nằm dưới kim
+  const targetAngle = 3 * Math.PI / 2 - (index * arc + arc / 2);
+  
+  // Thêm vòng quay
+  const spins = 5 * Math.PI * 2;
   const finalAngle = spins + targetAngle;
-
-  const duration = 3000;
-  const start = performance.now();
-  const initial = startAngle;
-
+  
+  // Hiệu ứng quay
+  const duration = 4000;
+  const startTime = performance.now();
+  const initialAngle = startAngle;
+  
   function animate(time) {
-    const t = Math.min((time - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - t, 3); // ease out
-    startAngle = initial + finalAngle * ease;
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Easing function để có hiệu ứng quay thực tế
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+    
+    startAngle = initialAngle + finalAngle * easeOut;
     drawWheel();
-
-    if (t < 1) {
+    
+    if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      document.getElementById("result").innerText =
-        "👉 Kết quả: " + options[index];
+      // Kết thúc quay
+      finishSpin(index);
     }
   }
-
+  
   requestAnimationFrame(animate);
 }
 
-document.getElementById("spinBtn").addEventListener("click", spin);
-</script>
+// Xử lý khi quay xong
+function finishSpin(index) {
+  const result = options[index];
+  
+  // Hiển thị kết quả
+  resultElement.textContent = result;
+  resultElement.classList.add("result-active");
+  resultElement.classList.add("highlight");
+  
+  // Cập nhật kết quả cuối
+  lastResultElement.textContent = result.charAt(result.length - 1);
+  
+  // Thêm vào lịch sử
+  const now = new Date();
+  const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  
+  const historyItem = {
+    result: result,
+    time: timeString,
+    spinNumber: spinCount
+  };
+  
+  spinHistory.unshift(historyItem);
+  updateHistoryList();
+  
+  // Reset trạng thái
+  setTimeout(() => {
+    isSpinning = false;
+    resultElement.classList.remove("highlight");
+    
+    if (spinCount < order.length) {
+      spinBtn.disabled = false;
+      spinBtn.textContent = "QUAY TIẾP!";
+    } else {
+      spinBtn.textContent = "ĐÃ HẾT LƯỢT";
+      resultElement.textContent = "🎉 ĐÃ HOÀN THÀNH TẤT CẢ LẦN QUAY!";
+    }
+  }, 1000);
+}
 
+// Cập nhật danh sách lịch sử
+function updateHistoryList() {
+  historyList.innerHTML = "";
+  
+  spinHistory.forEach((item, idx) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${item.result}</span>
+      <span style="opacity: 0.7;">Lần ${item.spinNumber} - ${item.time}</span>
+    `;
+    historyList.appendChild(li);
+  });
+}
+
+// Gán sự kiện cho nút quay
+spinBtn.addEventListener("click", spin);
+
+// Thêm hiệu ứng cho kim chỉ
+const pointer = document.getElementById("pointer");
+setInterval(() => {
+  if (isSpinning) {
+    pointer.style.borderTopColor = `hsl(${Math.random() * 60 + 330}, 100%, 65%)`;
+  }
+}, 300);
+</script>
 </body>
 </html>
- 
