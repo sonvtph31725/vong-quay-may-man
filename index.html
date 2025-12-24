@@ -349,7 +349,7 @@
     z-index: 1;
   }
 
-  /* Hiệu ứng chúc mừng */
+  /* Popup chúc mừng sau mỗi lần quay */
   .congratulations {
     position: fixed;
     top: 0;
@@ -360,7 +360,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
   }
 
   .congratulations.active {
@@ -374,10 +374,11 @@
     border-radius: 20px;
     text-align: center;
     max-width: 600px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
     animation: zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.2);
   }
 
   .congratulations-content:before {
@@ -397,16 +398,27 @@
   }
 
   .congratulations h2 {
-    font-size: 3.5rem;
-    margin-bottom: 20px;
+    font-size: 3rem;
+    margin-bottom: 15px;
     color: white;
-    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   }
 
-  .congratulations p {
-    font-size: 1.5rem;
+  .result-message {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+  }
+
+  .spin-number {
+    font-size: 1.2rem;
     margin-bottom: 30px;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 20px;
+    border-radius: 50px;
+    display: inline-block;
   }
 
   #closeCongratulations {
@@ -419,14 +431,17 @@
     cursor: pointer;
     transition: var(--transition);
     backdrop-filter: blur(10px);
+    font-weight: 600;
+    letter-spacing: 1px;
   }
 
   #closeCongratulations:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
   }
 
-  /* Animation cho kết quả */
+  /* Animation */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -477,7 +492,11 @@
     }
     
     .congratulations h2 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
+    }
+    
+    .result-message {
+      font-size: 1.5rem;
     }
   }
 
@@ -493,6 +512,14 @@
     
     .result-section {
       padding: 20px;
+    }
+    
+    .congratulations h2 {
+      font-size: 1.8rem;
+    }
+    
+    .result-message {
+      font-size: 1.3rem;
     }
   }
 
@@ -521,13 +548,13 @@
 <!-- Canvas cho pháo hoa -->
 <canvas id="fireworksCanvas"></canvas>
 
-<!-- Popup chúc mừng -->
+<!-- Popup chúc mừng sau mỗi lần quay -->
 <div class="congratulations" id="congratulations">
   <div class="congratulations-content">
     <h2>🎉 CHÚC MỪNG! 🎉</h2>
-    <p>Bạn đã hoàn thành tất cả các lần quay!</p>
-    <p>Kết quả cuối cùng: <strong id="finalResult">Tình huống 1</strong></p>
-    <button id="closeCongratulations">Đóng</button>
+    <div class="result-message" id="congratsResult">Tình huống 1</div>
+    <div class="spin-number" id="congratsSpinNumber">Lần quay: 1/3</div>
+    <button id="closeCongratulations">Tiếp tục quay</button>
   </div>
 </div>
 
@@ -595,7 +622,7 @@
 
 <div class="footer">
   <p>Vòng quay may mắn © 2023 | Thiết kế bởi Frontend Dev 20 năm kinh nghiệm</p>
-  <p>Kim sẽ chỉ chính xác vào Tình huống 1 ở lần quay cuối cùng!</p>
+  <p>Mỗi lần quay xong đều có pháo hoa nổ và thông báo chúc mừng!</p>
 </div>
 
 <script>
@@ -609,7 +636,8 @@ const remainingSpinsElement = document.getElementById("remainingSpins");
 const lastResultElement = document.getElementById("lastResult");
 const fireworksCanvas = document.getElementById("fireworksCanvas");
 const congratulations = document.getElementById("congratulations");
-const finalResultElement = document.getElementById("finalResult");
+const congratsResult = document.getElementById("congratsResult");
+const congratsSpinNumber = document.getElementById("congratsSpinNumber");
 const closeCongratulationsBtn = document.getElementById("closeCongratulations");
 
 // Cấu hình vòng quay
@@ -618,7 +646,6 @@ const colors = ["#f1c40f", "#e74c3c", "#3498db"];
 const arc = (2 * Math.PI) / options.length;
 
 // Thứ tự kết quả: lần 1 -> 3, lần 2 -> 2, lần 3 -> 1
-// Đảm bảo lần cuối chỉ chính xác vào tình huống 1
 const order = [2, 1, 0]; // index trong options (0: Tình huống 1, 1: Tình huống 2, 2: Tình huống 3)
 
 // Biến trạng thái
@@ -660,10 +687,10 @@ function drawWheel() {
     ctx.rotate(angle + arc / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif"; // Giảm từ 22px xuống 16px
+    ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
     ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
     ctx.shadowBlur = 5;
-    ctx.fillText(options[i], radius - 25, 6); // Điều chỉnh vị trí
+    ctx.fillText(options[i], radius - 25, 6);
     ctx.restore();
   }
   
@@ -693,7 +720,7 @@ function drawWheel() {
   
   // Vẽ biểu tượng ở tâm
   ctx.fillStyle = "#2a2a3e";
-  ctx.font = "bold 16px Arial"; // Cũng giảm kích thước
+  ctx.font = "bold 16px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("🎯", center, center);
@@ -709,18 +736,16 @@ function spin() {
   
   // Xác định kết quả theo thứ tự
   const index = order[spinCount];
-  spinCount++;
   
   // Cập nhật thống kê
-  spinCountElement.textContent = spinCount;
-  remainingSpinsElement.textContent = Math.max(0, order.length - spinCount);
+  spinCountElement.textContent = spinCount + 1;
+  remainingSpinsElement.textContent = Math.max(0, order.length - (spinCount + 1));
   
   // Tính toán góc đích
   let targetAngle;
   
-  if (spinCount === order.length) {
+  if (spinCount + 1 === order.length) {
     // Lần quay cuối: chỉ chính xác vào tình huống 1 (index 0)
-    // Điều chỉnh để kim chỉ chính xác vào giữa phần tình huống 1
     targetAngle = 3 * Math.PI / 2 - (0 * arc + arc / 2);
   } else {
     // Các lần quay trước: theo thứ tự bình thường
@@ -732,7 +757,7 @@ function spin() {
   const finalAngle = spins + targetAngle;
   
   // Hiệu ứng quay
-  const duration = spinCount === order.length ? 4500 : 4000; // Lần cuối quay lâu hơn chút
+  const duration = (spinCount + 1 === order.length) ? 4500 : 4000;
   const startTime = performance.now();
   const initialAngle = startAngle;
   
@@ -740,10 +765,9 @@ function spin() {
     const elapsed = time - startTime;
     const progress = Math.min(elapsed / duration, 1);
     
-    // Easing function để có hiệu ứng quay thực tế
+    // Easing function
     let easeOut;
-    if (spinCount === order.length) {
-      // Lần cuối: ease out mạnh hơn để chính xác
+    if (spinCount + 1 === order.length) {
       easeOut = 1 - Math.pow(1 - progress, 4);
     } else {
       easeOut = 1 - Math.pow(1 - progress, 3);
@@ -766,6 +790,7 @@ function spin() {
 // Xử lý khi quay xong
 function finishSpin(index) {
   const result = options[index];
+  spinCount++;
   
   // Hiển thị kết quả
   resultElement.textContent = result;
@@ -797,18 +822,26 @@ function finishSpin(index) {
       spinBtn.disabled = false;
       spinBtn.textContent = `QUAY LẦN ${spinCount + 1}`;
     } else {
-      // Lần quay cuối cùng
       spinBtn.textContent = "ĐÃ HOÀN THÀNH!";
-      finalResultElement.textContent = result;
-      
-      // Hiển thị pháo hoa và chúc mừng
-      setTimeout(() => {
-        startFireworks();
-        setTimeout(() => {
-          congratulations.classList.add("active");
-        }, 1000);
-      }, 500);
     }
+    
+    // BẮT ĐẦU PHÁO HOA và POPUP CHÚC MỪNG
+    startFireworks();
+    
+    // Hiển thị popup chúc mừng
+    setTimeout(() => {
+      congratsResult.textContent = result;
+      congratsSpinNumber.textContent = `Lần quay: ${spinCount}/${order.length}`;
+      congratulations.classList.add("active");
+      
+      // Cập nhật text nút đóng
+      if (spinCount >= order.length) {
+        closeCongratulationsBtn.textContent = "Đóng";
+      } else {
+        closeCongratulationsBtn.textContent = "Tiếp tục quay";
+      }
+    }, 800);
+    
   }, 1000);
 }
 
@@ -826,13 +859,14 @@ function updateHistoryList() {
   });
 }
 
-// Hệ thống pháo hoa
+// HỆ THỐNG PHÁO HOA
 const fireworksCtx = fireworksCanvas.getContext("2d");
 fireworksCanvas.width = window.innerWidth;
 fireworksCanvas.height = window.innerHeight;
 
 let particles = [];
 let fireworks = [];
+let isFireworksActive = false;
 
 class Particle {
   constructor(x, y, color, velocity, size = 2, gravity = 0.01, decay = 0.015) {
@@ -871,7 +905,7 @@ class Particle {
 }
 
 class Firework {
-  constructor(x, y, targetX, targetY) {
+  constructor(x, y, targetX, targetY, color = null) {
     this.x = x;
     this.y = y;
     this.targetX = targetX;
@@ -887,7 +921,7 @@ class Firework {
     this.trail = [];
     this.trailLength = 5;
     this.exploded = false;
-    this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+    this.color = color || `hsl(${Math.random() * 360}, 100%, 60%)`;
   }
   
   update() {
@@ -913,18 +947,21 @@ class Firework {
   
   explode() {
     this.exploded = true;
-    const particleCount = 80 + Math.random() * 50;
+    const particleCount = 60 + Math.random() * 40;
     
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 2 + Math.random() * 6;
+      const speed = 2 + Math.random() * 5;
       const velocity = {
         x: Math.cos(angle) * speed,
         y: Math.sin(angle) * speed
       };
       
-      // Tạo các màu sắc đa dạng cho pháo hoa
-      const hue = Math.floor(Math.random() * 360);
+      // Sử dụng màu của pháo hoa hoặc tạo màu ngẫu nhiên
+      const hue = this.color.startsWith('hsl') ? 
+        parseInt(this.color.match(/hsl\((\d+)/)[1]) : 
+        Math.floor(Math.random() * 360);
+      
       const color = `hsl(${hue}, 100%, 60%)`;
       
       particles.push(new Particle(
@@ -932,7 +969,7 @@ class Firework {
         this.y,
         color,
         velocity,
-        2 + Math.random() * 3,
+        1.5 + Math.random() * 2.5,
         0.02,
         0.01 + Math.random() * 0.01
       ));
@@ -967,17 +1004,28 @@ class Firework {
   }
 }
 
-function createFirework() {
+function createFireworkAtPosition(x, y, color = null) {
   const startX = Math.random() * fireworksCanvas.width;
   const startY = fireworksCanvas.height;
-  const targetX = Math.random() * fireworksCanvas.width * 0.6 + fireworksCanvas.width * 0.2;
-  const targetY = Math.random() * fireworksCanvas.height * 0.4 + fireworksCanvas.height * 0.1;
+  const targetX = x || Math.random() * fireworksCanvas.width * 0.6 + fireworksCanvas.width * 0.2;
+  const targetY = y || Math.random() * fireworksCanvas.height * 0.4 + fireworksCanvas.height * 0.1;
   
-  fireworks.push(new Firework(startX, startY, targetX, targetY));
+  fireworks.push(new Firework(startX, startY, targetX, targetY, color));
+}
+
+function createFireworkBurst(x, y, count = 5, color = null) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      createFireworkAtPosition(x, y, color);
+    }, i * 100);
+  }
 }
 
 function animateFireworks() {
-  fireworksCtx.fillStyle = "rgba(15, 15, 30, 0.1)";
+  if (!isFireworksActive) return;
+  
+  // Tạo hiệu ứng mờ dần
+  fireworksCtx.fillStyle = "rgba(15, 15, 30, 0.08)";
   fireworksCtx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
   
   // Cập nhật và vẽ pháo hoa
@@ -1001,38 +1049,73 @@ function animateFireworks() {
   }
   
   // Thêm pháo hoa mới ngẫu nhiên
-  if (Math.random() < 0.05) {
-    createFirework();
+  if (Math.random() < 0.04) {
+    createFireworkAtPosition();
   }
   
   requestAnimationFrame(animateFireworks);
 }
 
 function startFireworks() {
-  // Xóa canvas pháo hoa
-  fireworksCtx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+  isFireworksActive = true;
   
-  // Tạo một loạt pháo hoa ban đầu
-  for (let i = 0; i < 12; i++) {
+  // Tạo pháo hoa xung quanh vòng quay
+  const wheelX = canvas.getBoundingClientRect().left + canvas.width / 2;
+  const wheelY = canvas.getBoundingClientRect().top + canvas.height / 2;
+  
+  // Màu sắc dựa trên kết quả
+  const resultColors = {
+    "Tình huống 1": "#f1c40f",
+    "Tình huống 2": "#e74c3c", 
+    "Tình huống 3": "#3498db"
+  };
+  
+  const currentResult = options[order[spinCount - 1]];
+  const primaryColor = resultColors[currentResult];
+  
+  // Tạo nhiều pháo hoa
+  for (let i = 0; i < 8; i++) {
     setTimeout(() => {
-      createFirework();
+      // Pháo hoa tập trung xung quanh vòng quay
+      const angle = (i / 8) * Math.PI * 2;
+      const distance = 150 + Math.random() * 100;
+      const targetX = wheelX + Math.cos(angle) * distance;
+      const targetY = wheelY + Math.sin(angle) * distance - 50;
+      
+      createFireworkAtPosition(targetX, targetY, primaryColor);
     }, i * 200);
   }
   
-  // Bắt đầu animation
-  animateFireworks();
+  // Thêm pháo hoa rải rác
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      createFireworkAtPosition();
+    }, i * 300 + 500);
+  }
   
-  // Dừng pháo hoa sau 15 giây
-  setTimeout(() => {
-    particles = [];
-    fireworks = [];
-  }, 15000);
+  // Bắt đầu animation nếu chưa chạy
+  if (!isFireworksActive) {
+    animateFireworks();
+  }
+}
+
+function stopFireworks() {
+  isFireworksActive = false;
+  particles = [];
+  fireworks = [];
 }
 
 // Gán sự kiện
 spinBtn.addEventListener("click", spin);
+
 closeCongratulationsBtn.addEventListener("click", () => {
   congratulations.classList.remove("active");
+  
+  // Dừng pháo hoa sau khi đóng popup
+  setTimeout(() => {
+    stopFireworks();
+    fireworksCtx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+  }, 1000);
 });
 
 // Điều chỉnh kích thước canvas khi resize
